@@ -15,5 +15,5 @@ path "auth/approle/role/go_vault_session_role/secret-id" {
 }
 
 path "secret/*" {
-    capabilities = ["create", "update", "read"]
+  capabilities = ["create", "update", "read"]
 }
