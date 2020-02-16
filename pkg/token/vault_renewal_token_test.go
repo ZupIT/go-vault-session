@@ -1,4 +1,4 @@
-package login
+package token
 
 import (
 	"os"
@@ -6,16 +6,17 @@ import (
 
 	"github.com/hashicorp/vault/api"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/ZupIT/go-vault-session/pkg/login"
 )
 
-func Test_Should_login_in_vault_with_success(t *testing.T) {
-	assert.NotEmpty(t, roleId)
-	assert.NotEmpty(t, secretId)
-	assert.Equal(t, appRoleAuth, authType)
+func Test_Should_renewal_vault_token_success(t *testing.T) {
+	client := vaultClient()
+	l := login.NewHandler(client)
+	secret := l.HandleLogin()
 
-	client := config()
-	login := NewHandler(client)
-	_ = login.HandleLogin()
+	renewal := NewRenewalHandler(client, secret)
+	renewal.HandleRenewal()
 
 	vaultToken := os.Getenv(api.EnvVaultToken)
 	assert.NotEmpty(t, vaultToken)
@@ -35,7 +36,7 @@ func Test_Should_login_in_vault_with_success(t *testing.T) {
 	assert.Equal(t, "test_ok", nameTest)
 }
 
-func config() *api.Client {
+func vaultClient() *api.Client {
 	vaultConfig := api.DefaultConfig()
 	_ = vaultConfig.ReadEnvironment()
 	client, _ := api.NewClient(vaultConfig)

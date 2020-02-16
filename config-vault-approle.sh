@@ -19,8 +19,8 @@ unzip "$C_DIR"/resources/vault_1.3.0_"$(uname -s)"_amd64.zip -d /tmp/vault/
 # Enable auth method APPROLE
 /tmp/vault/vault auth enable approle
 
-# Add vault_session_policy for APPROLE authentication with 15-second token period
-/tmp/vault/vault write auth/approle/role/go_vault_session_role policies=vault_session_policy period=15s
+# Add vault_session_policy for APPROLE authentication with 5-second token period
+/tmp/vault/vault write auth/approle/role/go_vault_session_role policies=vault_session_policy period=5s
 
 rm -f /tmp/vault/role-id.txt
 rm -f /tmp/vault/secret-id.txt
