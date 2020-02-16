@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  vault:
+    image: vault:1.3.0
+    ports:
+      - "8200:8200"
+    volumes:
+      - ./resources/vault.hcl:/vault/config/vault.hcl
+    environment:
+      - VAULT_DEV_ROOT_TOKEN_ID=c8159b3f-e7fd-4be4-badd-cd0b78207381
+      - VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8200
+      - SKIP_SETCAP=true
+      - disable_mlock=true
