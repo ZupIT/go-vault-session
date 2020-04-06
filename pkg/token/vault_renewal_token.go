@@ -6,16 +6,20 @@ import (
 	"github.com/hashicorp/vault/api"
 )
 
-type Renewal struct {
+type Handler interface {
+	Handle()
+}
+
+type Manager struct {
 	client *api.Client
 	secret *api.Secret
 }
 
-func NewRenewalHandler(c *api.Client, s *api.Secret) *Renewal {
-	return &Renewal{client: c, secret: s}
+func NewHandler(c *api.Client, s *api.Secret) *Manager {
+	return &Manager{client: c, secret: s}
 }
 
-func (c *Renewal) HandleRenewal() {
+func (c *Manager) Handle() {
 	r, _ := c.client.NewRenewer(&api.RenewerInput{Secret: c.secret})
 
 	go func() {

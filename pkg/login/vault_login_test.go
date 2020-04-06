@@ -15,7 +15,7 @@ func Test_Should_login_in_vault_with_success(t *testing.T) {
 
 	client := config()
 	login := NewHandler(client)
-	_ = login.HandleLogin()
+	_ = login.Handle()
 
 	vaultToken := os.Getenv(api.EnvVaultToken)
 	assert.NotEmpty(t, vaultToken)

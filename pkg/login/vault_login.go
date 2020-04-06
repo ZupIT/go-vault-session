@@ -23,15 +23,19 @@ const (
 	defaultKubernetesServiceAccountTokenFile = "/var/run/secrets/kubernetes.io/serviceaccount/token"
 )
 
-type Login struct {
+type Handler interface {
+	Handle() *api.Secret
+}
+
+type Manager struct {
 	client *api.Client
 }
 
-func NewHandler(c *api.Client) *Login {
-	return &Login{client: c}
+func NewHandler(c *api.Client) *Manager {
+	return &Manager{client: c}
 }
 
-func (l *Login) HandleLogin() *api.Secret {
+func (l *Manager) Handle() *api.Secret {
 	path, body := authResolver()
 	res, err := l.client.Logical().Write(path, body)
 	if err != nil {
@@ -68,7 +72,7 @@ func authResolver() (string, map[string]interface{}) {
 func readK8sJwt() string {
 	jwt, err := ioutil.ReadFile(defaultKubernetesServiceAccountTokenFile)
 	if err != nil {
-		log.Panicln(err)
+		log.Fatal(err)
 	}
 
 	return string(jwt)
