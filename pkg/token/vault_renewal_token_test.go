@@ -5,10 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/hashicorp/vault/api"
-	"github.com/stretchr/testify/assert"
-
 	"github.com/ZupIT/go-vault-session/pkg/login"
+	"github.com/hashicorp/vault/api"
 )
 
 var client *api.Client
@@ -23,7 +21,7 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func Test_Should_renewal_vault_token_success(t *testing.T) {
+func TestHandle(t *testing.T) {
 
 	type in struct {
 		path string
@@ -56,7 +54,6 @@ func Test_Should_renewal_vault_token_success(t *testing.T) {
 	renewal.Handle()
 
 	vaultToken := os.Getenv(api.EnvVaultToken)
-	assert.NotEmpty(t, vaultToken)
 	client.SetToken(vaultToken)
 
 	for _, tt := range tests {
@@ -66,18 +63,17 @@ func Test_Should_renewal_vault_token_success(t *testing.T) {
 			}
 			_, _ = client.Logical().Write(tt.in.path, body)
 
-			got, err := client.Logical().Read(tt.in.path)
+			res, err := client.Logical().Read(tt.in.path)
 
 			if err != tt.out.err {
 				t.Errorf("Renewal(%s) got %v, want %v", tt.name, err, tt.out.err)
 			}
 
+			got := res.Data["data"].(map[string]interface{})
+
 			if !reflect.DeepEqual(tt.out.want, got) {
-				t.Errorf("Renewal(%s) got %v, want %v", tt.name, got,tt.out.want)
+				t.Errorf("Renewal(%s) got %v, want %v", tt.name, got, tt.out.want)
 			}
-			/*data := res.Data["data"].(map[string]interface{})
-			nameTest := data["test"]
-			assert.Equal(t, "test_ok", nameTest)*/
 		})
 	}
 }

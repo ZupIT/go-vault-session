@@ -2,37 +2,80 @@ package login
 
 import (
 	"os"
+	"reflect"
 	"testing"
 
 	"github.com/hashicorp/vault/api"
-	"github.com/stretchr/testify/assert"
 )
 
-func Test_Should_login_in_vault_with_success(t *testing.T) {
-	assert.NotEmpty(t, roleId)
-	assert.NotEmpty(t, secretId)
-	assert.Equal(t, appRoleAuth, authType)
+var client *api.Client
 
-	client := config()
-	login := NewHandler(client)
-	_ = login.Handle()
+func TestMain(m *testing.M) {
+	client = config()
+	os.Exit(m.Run())
+}
 
-	vaultToken := os.Getenv(api.EnvVaultToken)
-	assert.NotEmpty(t, vaultToken)
-	client.SetToken(vaultToken)
+func TestHandle(t *testing.T) {
 
-	pathWithKey := "secret/data/my-secret"
-	body := map[string]interface{}{
-		"data": map[string]string{"test": "test_ok"},
+	type in struct {
+		path string
+		data map[string]string
 	}
-	_, _ = client.Logical().Write(pathWithKey, body)
 
-	res, err := client.Logical().Read(pathWithKey)
-	assert.Nil(t, err)
+	type out struct {
+		err  error
+		want map[string]interface{}
+	}
 
-	data := res.Data["data"].(map[string]interface{})
-	nameTest := data["test"]
-	assert.Equal(t, "test_ok", nameTest)
+	tests := []struct {
+		name string
+		in   *in
+		out  *out
+	}{
+		{
+			name: "login success",
+			in: &in{
+				path: "secret/data/my-secret",
+				data: map[string]string{"test": "test_ok"},
+			},
+			out: &out{
+				err:  nil,
+				want: map[string]interface{}{"test": "test_ok"},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			login := NewHandler(client)
+			login.Handle()
+
+			vaultToken := os.Getenv(api.EnvVaultToken)
+
+			if vaultToken == "" {
+				t.Errorf("Login(%s) must be a vault token valid", tt.name)
+			}
+
+			client.SetToken(vaultToken)
+
+			body := map[string]interface{}{
+				"data": tt.in.data,
+			}
+			_, _ = client.Logical().Write(tt.in.path, body)
+
+			res, err := client.Logical().Read(tt.in.path)
+
+			if err != tt.out.err {
+				t.Errorf("Login(%s) got %v, want %v", tt.name, err, tt.out.err)
+			}
+
+			got := res.Data["data"].(map[string]interface{})
+
+			if !reflect.DeepEqual(tt.out.want, got) {
+				t.Errorf("Login(%s) got %v, want %v", tt.name, got, tt.out.want)
+			}
+		})
+	}
 }
 
 func config() *api.Client {
