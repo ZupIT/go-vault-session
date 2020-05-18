@@ -10,6 +10,7 @@
 *.so
 *.dylib
 go.sum
+go-vault-session
 # Test binary, built with `go test -c`
 *.test
 

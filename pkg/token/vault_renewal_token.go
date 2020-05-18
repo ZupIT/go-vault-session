@@ -13,10 +13,11 @@ type Handler interface {
 type Manager struct {
 	client *api.Client
 	secret *api.Secret
+	ch     chan string
 }
 
-func NewHandler(c *api.Client, s *api.Secret) *Manager {
-	return &Manager{client: c, secret: s}
+func NewHandler(c *api.Client, s *api.Secret, ch chan string) *Manager {
+	return &Manager{client: c, secret: s, ch: ch}
 }
 
 func (c *Manager) Handle() {
@@ -31,8 +32,8 @@ func (c *Manager) Handle() {
 				if err != nil {
 					log.Fatal(err)
 				}
-			case _ = <-r.RenewCh():
-				log.Println("Token successfully renewed")
+			case <-r.RenewCh():
+				c.ch <- "Token successfully renewed"
 			}
 		}
 	}()
