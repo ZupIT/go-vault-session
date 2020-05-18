@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/ernelio/go-vault-session/pkg/token"
+	"github.com/ZupIT/go-vault-session/pkg/token"
 	"github.com/hashicorp/vault/api"
 	"log"
 
-	"github.com/ernelio/go-vault-session/pkg/login"
+	"github.com/ZupIT/go-vault-session/pkg/login"
 )
 
 func main() {
