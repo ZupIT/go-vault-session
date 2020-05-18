@@ -15,8 +15,9 @@ var renewal *Manager
 func TestMain(m *testing.M) {
 	client = vaultClient()
 	secret := login.NewHandler(client).Handle()
+	ch := make(chan string)
 
-	renewal = NewHandler(client, secret)
+	renewal = NewHandler(client, secret, ch)
 
 	os.Exit(m.Run())
 }

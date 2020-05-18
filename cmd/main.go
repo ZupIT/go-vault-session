@@ -30,7 +30,8 @@ func vaultConfig() *api.Client {
 func vaultStarter(client *api.Client) {
 	vaultLogin := login.NewHandler(client)
 	secret := vaultLogin.Handle()
+	ch := make(chan string)
 
-	renewal := token.NewHandler(client, secret)
+	renewal := token.NewHandler(client, secret, ch)
 	renewal.Handle()
 }
