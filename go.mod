@@ -1,4 +1,4 @@
-module github.com/ZupIT/go-vault-session
+module github.com/ernelio/go-vault-session
 
 go 1.13
 
