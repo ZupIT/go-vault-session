@@ -9,18 +9,15 @@ import (
 )
 
 var (
-	authType = os.Getenv("VAULT_AUTHENTICATION")
-	roleId   = os.Getenv("VAULT_ROLE_ID")
-	secretId = os.Getenv("VAULT_SECRET_ID")
-	k8sRole  = os.Getenv("VAULT_K8S_ROLE")
-)
-
-const (
-	k8sPath                                  = "auth/kubernetes/login"
-	k8sAuth                                  = "KUBERNETES"
-	appRolePath                              = "auth/approle/login"
-	appRoleAuth                              = "APPROLE"
-	defaultKubernetesServiceAccountTokenFile = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+	authType                                 = os.Getenv("VAULT_AUTHENTICATION")
+	roleId                                   = os.Getenv("VAULT_ROLE_ID")
+	secretId                                 = os.Getenv("VAULT_SECRET_ID")
+	k8sRole                                  = os.Getenv("VAULT_K8S_ROLE")
+	k8sPath                                  = getEnv("VAULT_K8S_PATH", "auth/kubernetes/login")
+	k8sAuth                                  = getEnv("VAULT_K8S_AUTH", "KUBERNETES")
+	appRolePath                              = getEnv("VAULT_APP_ROLE_PATH", "auth/approle/login")
+	appRoleAuth                              = getEnv("VAULT_APP_ROLE_AUTH", "APPROLE")
+	defaultKubernetesServiceAccountTokenFile = getEnv("VAULT_DEFAULT_K8S_SERVICE_ACCOUNT_TOKEN_FILE", "/var/run/secrets/kubernetes.io/serviceaccount/token")
 )
 
 type Handler interface {
@@ -76,4 +73,12 @@ func readK8sJwt() string {
 	}
 
 	return string(jwt)
+}
+
+func getEnv(key, fallback string) string {
+	value, exists := os.LookupEnv(key)
+	if !exists {
+		value = fallback
+	}
+	return value
 }
